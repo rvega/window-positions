@@ -1,4 +1,4 @@
-#! /usr/bin/node
+#! /usr/bin/env node
 
 // Libraries
 var shell = require('child_process');
@@ -19,18 +19,22 @@ function print(a){
 }
 
 function get_window_info(window){
+   if(window == '') return false;
+
    window = window.split(' ');
-   window = window.filter(function(n){ return n; });
+   window = window.filter(function(n){ return n; }); // Get rid of extra whitespace within the split array
 
    var info = {};
    info.wid = window[0];
-   info.workspace = window[1];
-   info.pid = window[2];
-   info.x = window[3];
-   info.y = window[4];
-   info.w = window[5];
-   info.h = window[6];
+   info.workspace = Number(window[1]);
+   info.pid = Number(window[2]);
+   info.x = Number(window[3]);
+   info.y = Number(window[4]);
+   info.w = Number(window[5]);
+   info.h = Number(window[6]);
    info.title = window.splice(8, window.length).join(' ');
+
+   if(info.workspace == -1) return false; // This is the Desktop
 
    return info;
 }
@@ -45,8 +49,8 @@ function get_windows_info(){
       var window_count = windows.length;
       var infos = [];
       windows.forEach(function(window){
-         if(window != ''){
-            var info = get_window_info(window);
+         var info = get_window_info(window);
+         if(info){
             infos.push(info);
          }
 
