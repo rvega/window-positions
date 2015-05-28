@@ -1,0 +1,82 @@
+#! /usr/bin/env nodejs
+
+/* 
+ * Copyright (C) 2015 Rafael Vega <contacto@rafaelvega.co> 
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// Libraries
+var shell = require('child_process');
+var fs = require('fs');
+
+// Config variables
+var window_set_geometry_command = 'wmctrl -r "{1}" -e "{2}"';
+var window_set_state_command = 'wmctrl -r "{1}" -b add,{2}';
+var window_minimize_command = 'wmctrl -Y "{1}"';
+
+function parse_parameters(){
+   var params = {
+      input_filename : process.env['HOME']+'/.config/window_positions/window_positions.json'
+   };
+
+   if(typeof(process.argv[2]) != 'undefined'){
+      params.input_filename = process.argv[2];
+   }
+
+   return params;
+}
+
+function set_windows_info(windows_info){
+   windows_info.forEach(function(window){
+      // Maybe this magic_number comes from the _NET_WM_OPAQUE_REGION
+      // window property (see get-geometries script)?
+      var magic_number = 6; 
+      var y = window.y - 2*(window.decorations.top+window.decorations.bottom) - magic_number;
+      var x = window.x + window.decorations.left - 2*magic_number;
+      var w = window.w;
+      var h = window.h
+      var geometry = '0,' + x + ',' + y + ',' + w + ',' + h;
+      var command = window_set_geometry_command.replace('{1}', window.title).replace('{2}',geometry);
+      shell.exec(command, function(err, stdout, stderr){});
+
+      window.states.forEach(function(state){
+         command = window_set_state_command.replace('{1}', window.title).replace('{2}', state);
+         shell.exec(command, function(err, stdout, stderr){});
+
+         if(state=='hidden'){
+            command = window_minimize_command.replace('{1}', window.title);
+            shell.exec(command, function(err, stdout, stderr){});
+         }
+      });
+   });
+}
+
+function read_file(params){
+   var windows_info = [];
+   try{
+      windows_info = JSON.parse(fs.readFileSync(params.input_filename));
+   }
+   catch(e){
+      console.error(e.message);
+   }
+   return windows_info;
+}
+
+var params = parse_parameters();
+var windows_info = read_file(params);
+set_windows_info(windows_info);
+
+
+// vim: set ft=javascript:

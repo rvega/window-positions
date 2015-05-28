@@ -1,0 +1,3 @@
+[submodule "vendors/wmctrl"]
+	path = vendors/wmctrl
+	url = https://github.com/geekless/wmctrl.git

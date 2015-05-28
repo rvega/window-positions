@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Load Window Positions
+Categories=Accessories
+Icon=view-grid-symbolic
+Type=Application
+Terminal=false
+Exec={PREFIX}/bin/load-window-positions

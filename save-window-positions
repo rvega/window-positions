@@ -1,0 +1,174 @@
+#! /usr/bin/env nodejs
+
+/* 
+ * Copyright (C) 2015 Rafael Vega <contacto@rafaelvega.co> 
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// Libraries
+var shell = require('child_process');
+var fs = require('fs');
+
+// Config variables
+var window_list_command = 'wmctrl -lpG';
+var window_properties_command = 'xprop -id {1}'
+
+function print(a, params){
+   var s = JSON.stringify(a, null, "\t");
+   
+   fs.writeFileSync(params.output_filename, s); 
+}
+
+function get_window_info(window, callback){
+   if(window == ''){
+      callback(true, null);
+      return;
+   }
+
+   window = window.split(' ');
+   window = window.filter(function(n){ return n; }); // Get rid of extra whitespace within the split array
+
+   var info = {};
+   info.wid = window[0];
+   info.workspace = Number(window[1]);
+   info.pid = Number(window[2]);
+   info.x = Number(window[3]);
+   info.y = Number(window[4]);
+   info.w = Number(window[5]);
+   info.h = Number(window[6]);
+   info.title = window.splice(8, window.length).join(' ');
+
+   if(info.workspace == -1){ 
+      // This is the Desktop "window"
+      callback(true, null); 
+      return;
+   }
+
+   // The above info does not include window decorations or maximization
+   // state, get them with xprop.
+   var command = window_properties_command.replace('{1}', info.wid);
+   shell.exec(command, function(err, stdout, stderr){
+      var window_properties = stdout.split('\n');
+
+      var decorations = window_properties.filter(function(i){
+         return i.search('_NET_FRAME_EXTENTS') != -1;
+      });
+
+      try{
+         decorations = decorations[0].split(' = ')[1].split(',')
+         info.decorations = {
+            left: Number(decorations[0]),
+            right: Number(decorations[1]),
+            top: Number(decorations[2]),
+            bottom: Number(decorations[3])
+         };
+      }
+      catch(e){
+         info.decorations = {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0
+         };
+      }
+
+      var maximized = window_properties.filter(function(i){
+         return i.search('_NET_WM_STATE') != -1;
+      });
+      try{
+         info.states = [];
+         maximized = maximized[0].split(' = ')[1].split(',');
+         maximized.forEach(function(state){
+            state = state.trim();
+            if(state == '_NET_WM_STATE_HIDDEN'){
+               info.states.push('hidden');
+            }
+            if(state == '_NET_WM_STATE_MAXIMIZED_HORZ'){
+               info.states.push('maximized_horz');
+            }
+            if(state == '_NET_WM_STATE_MAXIMIZED_VERT'){
+               info.states.push('maximized_vert');
+            }
+         });
+      }
+      catch(e){
+         info.states = [];
+      }
+
+      /*
+       * Not sure if this is where the magic number used in 
+       * the set-geometries script comes from...
+       */
+         // var shadows = window_properties.filter(function(i){
+         //    return i.search('_NET_WM_OPAQUE_REGION') != -1;
+         // });
+         // try{
+         //    shadows = shadows[0].split(' = ')[1].split(',');
+         //    info.shadows = shadows;
+         // }
+         // catch(e){
+         //    info.shadows = [0,0,0,0,0,0,0,0];
+         // }
+
+      callback(false, info);
+   });
+}
+
+function get_windows_info(parameters){
+   shell.exec(window_list_command, function(err, stdout, stderr){
+      if(err){
+         console.error(err);
+         return;
+      }
+      var windows = stdout.split('\n');
+      var window_count = windows.length;
+      var infos = [];
+      windows.forEach(function(window){
+         get_window_info(window, function(err, info){
+            if(!err){
+               infos.push(info);
+            }
+
+            window_count--;
+            if(window_count <= 0){
+               print(infos, parameters);
+            }
+         });
+      });
+   });
+}
+
+function parse_parameters(){
+   var params = {
+      output_filename : process.env['HOME']+'/.config/window_positions/window_positions.json'
+   };
+
+  if(typeof(process.argv[2]) != 'undefined'){
+     params.output_filename = process.argv[2];
+  }
+  else{
+     // User is not setting a filename, let's create the directory
+     // to put the default savefile
+      fs.mkdir(process.env['HOME']+'/.config/window_positions', function(){});
+  }
+
+  return params;
+}
+
+var parameters = parse_parameters();
+get_windows_info(parameters);
+
+
+// vim: set ft=javascript:

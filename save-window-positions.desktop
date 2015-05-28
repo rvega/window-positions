@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Save Window Positions
+Categories=Accessories
+Icon=view-grid-symbolic
+Type=Application
+Terminal=false
+Exec={PREFIX}/bin/save-window-positions
