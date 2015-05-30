@@ -4,7 +4,7 @@ These are two simple programs that allow you to save the size and positions of t
 
 ## Simple use
 
-#### [Here's a video](https://vimeo.com/129056274).
+<iframe src="https://player.vimeo.com/video/129056274" width="500" height="313" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
 Open your programs, set up your windows the way you like them and run the "Save Window Positions" program. You can later recall the sizes and positions of the windows by running the "Load Window Positions" program.
 
