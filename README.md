@@ -22,10 +22,11 @@ Clone this git repository and use the Makefile:
 
     git clone https://github.com/rvega/window-positions.git
     cd window-positions
-    sudo install dependencies
+    sudo make install-dependencies
+    sudo make install-custom-wmctrl     ## Optional, read below.
     sudo make install
 
-This will install to /usr/local/ by default. Read the Makefile to change that and for other goodies.
+This will install to /usr/local/ by default. Read the Makefile to change the path and for other goodies.
 
 ## About wmctrl
 
