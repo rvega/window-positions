@@ -1,4 +1,4 @@
-#! /usr/bin/env nodejs
+#! /usr/bin/env node
 
 /* 
  * Copyright (C) 2015 Rafael Vega <contacto@rafaelvega.co> 
@@ -37,18 +37,22 @@ function get_window_info(window, callback){
       return;
    }
 
-   window = window.split(' ');
-   window = window.filter(function(n){ return n; }); // Get rid of extra whitespace within the split array
+   win= window.split(' ');
+   win= win.filter(function(n){ return n; }); // Get rid of extra whitespace within the split array
 
    var info = {};
-   info.wid = window[0];
-   info.workspace = Number(window[1]);
-   info.pid = Number(window[2]);
-   info.x = Number(window[3]);
-   info.y = Number(window[4]);
-   info.w = Number(window[5]);
-   info.h = Number(window[6]);
-   info.title = window.splice(8, window.length).join(' ');
+   info.wid = win[0];
+   info.workspace = Number(win[1]);
+   info.pid = Number(win[2]);
+   info.x = Number(win[3]);
+   info.y = Number(win[4]);
+   info.w = Number(win[5]);
+   info.h = Number(win[6]);
+
+   // Title must be handled differently because it might contain several consecutive spaces
+   var title_start = win.splice(8, win.length)[0];
+   var title_pos = window.search(title_start);
+   info.title = window.substring(title_pos);
 
    if(info.workspace == -1){ 
       // This is the Desktop "window"
