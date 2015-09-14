@@ -4,7 +4,9 @@ These are two simple programs that allow you to save the size and positions of t
 
 ## Simple use
 
-Open your programs, set up your windows the way you like them and run the "Save Window Positions" program. You can later recall the sizes and positions of the windows by running the "Load Window Positions" program. [Here's a video](https://vimeo.com/129056274).
+#### [Here's a video](https://vimeo.com/129056274)
+
+Open your programs, set up your windows the way you like them and run the "Save Window Positions" program. You can later recall the sizes and positions of the windows by running the "Load Window Positions" program.
 
 ## Advanced use
 
@@ -18,12 +20,13 @@ If you don't specify the filename, the default `~/.config/window-positions/windo
 
 Clone this git repository and use the Makefile:
 
-   git clone https://github.com/rvega/window-positions.git
-   cd window-positions
-   sudo install dependencies
-   sudo make install
+    git clone https://github.com/rvega/window-positions.git
+    cd window-positions
+    sudo make install-dependencies
+    sudo make install-custom-wmctrl     ## Optional, read below.
+    sudo make install
 
-This will install to /usr/local/ by default. Read the Makefile to change that and for other goodies.
+This will install to /usr/local/ by default. Read the Makefile to change the path and for other goodies.
 
 ## About wmctrl
 
