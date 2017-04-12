@@ -22,9 +22,9 @@ var shell = require('child_process');
 var fs = require('fs');
 
 // Config variables
-var window_set_geometry_command = 'wmctrl -r "{1}" -e "{2}"';
-var window_set_state_command = 'wmctrl -r "{1}" -b add,{2}';
-var window_minimize_command = 'wmctrl -Y "{1}"';
+var window_set_geometry_command = 'wmctrl -i -r "{1}" -e "{2}"';
+var window_set_state_command = 'wmctrl -i -r "{1}" -b add,{2}';
+var window_minimize_command = 'wmctrl -i -Y "{1}"';
 
 function parse_parameters(){
    var params = {
@@ -48,15 +48,15 @@ function set_windows_info(windows_info){
       var w = window.w;
       var h = window.h
       var geometry = '0,' + x + ',' + y + ',' + w + ',' + h;
-      var command = window_set_geometry_command.replace('{1}', window.title).replace('{2}',geometry);
+      var command = window_set_geometry_command.replace('{1}', window.wid).replace('{2}',geometry);
       shell.exec(command, function(err, stdout, stderr){});
 
       window.states.forEach(function(state){
-         command = window_set_state_command.replace('{1}', window.title).replace('{2}', state);
+         command = window_set_state_command.replace('{1}', window.wid).replace('{2}', state);
          shell.exec(command, function(err, stdout, stderr){});
 
          if(state=='hidden'){
-            command = window_minimize_command.replace('{1}', window.title);
+            command = window_minimize_command.replace('{1}', window.wid);
             shell.exec(command, function(err, stdout, stderr){});
          }
       });
